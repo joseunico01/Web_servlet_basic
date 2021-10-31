@@ -1,0 +1,86 @@
+package mito.basedatos;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import mito.basedatos.Persona_mito;
+
+public class ConexionBBDD {
+        
+public String solicitarValores(){
+        Scanner sc=new Scanner(System.in);
+        System.out.print("Digite el q nombre ingresara a la base de datos:");
+        String nombre=sc.next();
+        return nombre;
+}
+
+public void registrarBD(String valor){
+//JDBC 
+final String JDBC_DRIVER="com.mysql.cj.jdbc.Driver";
+final String DB_URL="jdbc:mysql://localhost:3306/curso_sql";
+
+//base de datos credenciales
+final String USER="root";
+final String PASS="vasquez";
+
+
+        try (Connection conexion=DriverManager.getConnection(DB_URL,USER,PASS)){
+               Class.forName(JDBC_DRIVER);
+               
+               PreparedStatement st=conexion.prepareStatement("insert into persona(nombre) values(?)");
+               st.setString(1, valor);
+               st.executeUpdate();
+               st.close();
+               
+        } catch (Exception e) {
+                e.getMessage();
+        }
+}
+
+public List<Persona_mito> listar(){
+
+List<Persona_mito> lista=null;
+//JDBC 
+final String JDBC_DRIVER="com.mysql.cj.jdbc.Driver";
+final String DB_URL="jdbc:mysql://localhost:3306/curso_sql";
+
+//base de datos credenciales
+final String USER="root";
+final String PASS="vasquez";
+
+
+        try (Connection conexion=DriverManager.getConnection(DB_URL,USER,PASS)){
+               Class.forName(JDBC_DRIVER);
+               
+               PreparedStatement st=conexion.prepareStatement("select * from persona");
+               lista=new ArrayList<>();
+               ResultSet rs =st.executeQuery();
+               while(rs.next()){
+                       Persona_mito per=new Persona_mito();
+                       per.setId(rs.getInt("id"));
+                       per.setNombre(rs.getString("nombre"));
+                       lista.add(per);
+               }
+               st.close();
+               st.close();
+               
+        } catch (Exception e) {
+                e.getMessage();
+        } 
+        return lista;
+}
+
+public static void main(String[] args){
+       ConexionBBDD curso=new ConexionBBDD();
+       String valor=curso.solicitarValores();
+       if(valor != null){
+       curso.registrarBD(valor);
+       }
+       
+       for(Persona_mito per:curso.listar()){
+               System.out.println(per.getId()+"-"+per.getNombre());
+       }
+}
+}
+
